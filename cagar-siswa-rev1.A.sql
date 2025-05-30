@@ -6,7 +6,9 @@ DROP DATABASE IF EXISTS cagarsiswasatu;
 CREATE DATABASE cagarsiswasatu;
 USE cagarsiswasatu;
 
+--------------------------------------   
 -- 1. DATA MASTER
+--------------------------------------
 
 -- Tahun Pelajaran
 CREATE TABLE IF NOT EXISTS tahun_pelajaran (
@@ -115,7 +117,9 @@ CREATE TABLE IF NOT EXISTS siswa (
     FOREIGN KEY (id_kelas) REFERENCES kelas(id_kelas) ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
+--------------------------------------   
 -- 2. DATA TRANSAKSI
+--------------------------------------
 
 -- Prestasi
 CREATE TABLE IF NOT EXISTS prestasi (
@@ -169,8 +173,10 @@ CREATE TABLE IF NOT EXISTS tindak_lanjut (
     FOREIGN KEY (id_guru_penangan) REFERENCES guru(id_guru) ON UPDATE CASCADE ON DELETE RESTRICT
 ) ENGINE=InnoDB;
 
--- 3. TABEL RIWAYAT (untuk trigger)
 
+--------------------------------------   
+-- 3. TABEL RIWAYAT (untuk trigger)
+--------------------------------------
 CREATE TABLE IF NOT EXISTS riwayat_pelanggaran (
     id_riwayat INT PRIMARY KEY AUTO_INCREMENT,
     id_pelanggaran INT NOT NULL,
@@ -201,7 +207,87 @@ CREATE TABLE IF NOT EXISTS riwayat_surat (
     FOREIGN KEY (id_siswa) REFERENCES siswa(id_siswa) ON UPDATE CASCADE ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- 4. TRIGGER
+--------------------------------------   
+-- 4. INSERT DUMMY
+--------------------------------------
+
+-- 1. Insert Tahun Pelajaran
+INSERT INTO tahun_pelajaran (tahun_awal, tahun_akhir, semester, status_aktif) VALUES
+(2023, 2024, 'Ganjil', TRUE),
+(2023, 2024, 'Genap', FALSE),
+(2024, 2025, 'Ganjil', FALSE);
+
+-- 2. Insert Jurusan
+INSERT INTO jurusan (kode_jurusan, nama_jurusan, deskripsi) VALUES
+('TKJ', 'Teknik Komputer dan Jaringan', 'Jurusan yang mempelajari tentang jaringan komputer dan perangkatnya'),
+('RPL', 'Rekayasa Perangkat Lunak', 'Jurusan yang mempelajari tentang pengembangan perangkat lunak'),
+('MM', 'Multimedia', 'Jurusan yang mempelajari tentang desain grafis dan produksi multimedia');
+
+-- 3. Insert Guru
+INSERT INTO guru (nip, nama_guru, jenis_kelamin, alamat, no_telp, email) VALUES
+('1965123120001', 'Dr. Ahmad Sanusi, M.Pd', 'L', 'Jl. Pendidikan No. 1', '08123456781', 'ahmad.sanusi@smk.edu'),
+('1970031520002', 'Drs. Budi Santoso', 'L', 'Jl. Guru No. 2', '08123456782', 'budi.santoso@smk.edu'),
+('1985112020003', 'Siti Aminah, S.Pd', 'P', 'Jl. Pelajar No. 3', '08123456783', 'siti.aminah@smk.edu');
+
+-- 4. Insert Poin Pelanggaran
+INSERT INTO poin_pelanggaran (kode_pelanggaran, nama_pelanggaran, kategori, bobot, deskripsi) VALUES
+('P001', 'Terlambat masuk sekolah', 'Ringan', 5, 'Siswa datang terlambat lebih dari 15 menit'),
+('P002', 'Tidak memakai seragam lengkap', 'Sedang', 10, 'Siswa tidak memakai atribut lengkap sesuai ketentuan'),
+('P003', 'Membawa HP saat ulangan', 'Berat', 25, 'Siswa ketahuan menggunakan HP saat ulangan');
+
+-- 5. Insert Poin Prestasi
+INSERT INTO poin_prestasi (kode_prestasi, nama_prestasi, kategori, bobot, deskripsi) VALUES
+('PR001', 'Juara 1 Lomba Tingkat Kabupaten', 'Luar Biasa', 30, 'Memenangkan lomba tingkat kabupaten/kota'),
+('PR002', 'Juara 2 Lomba Tingkat Sekolah', 'Sangat Baik', 20, 'Memenangkan lomba tingkat sekolah'),
+('PR003', 'Siswa Teladan Kelas', 'Baik', 15, 'Dipilih sebagai siswa teladan di kelasnya');
+
+-- 6. Insert Surat Pelanggaran
+INSERT INTO surat_pelanggaran (jenis_surat, min_poin, max_poin, deskripsi, konsekuensi) VALUES
+('Peringatan', 10, 25, 'Surat peringatan pertama', 'Panggilan orang tua dan pembinaan'),
+('SP1', 26, 50, 'Surat Peringatan 1', 'Panggilan orang tua dan skorsing 1 hari'),
+('SP2', 51, 75, 'Surat Peringatan 2', 'Panggilan orang tua dan skorsing 3 hari');
+
+-- 7. Insert Kelas (setelah ada tahun pelajaran, jurusan, dan guru)
+INSERT INTO kelas (id_jurusan, id_tahun_pelajaran, tingkat, nama_kelas, wali_kelas) VALUES
+(1, 1, 1, 'TKJ 1', 1),  -- Jurusan TKJ, Tahun Pelajaran 2023/2024 Ganjil, Wali kelas Dr. Ahmad
+(2, 1, 2, 'RPL 2', 2),  -- Jurusan RPL, Tahun Pelajaran 2023/2024 Ganjil, Wali kelas Drs. Budi
+(3, 1, 3, 'MM 3', 3);  -- Jurusan MM, Tahun Pelajaran 2023/2024 Ganjil, Wali kelas Siti Aminah
+
+-- 8. Insert Siswa (setelah ada kelas)
+INSERT INTO siswa (nis, nisn, nama_siswa, jenis_kelamin, tempat_lahir, tanggal_lahir, alamat, no_telp, id_kelas) VALUES
+('S001', '1234567890', 'Andi Wijaya', 'L', 'Jakarta', '2007-05-10', 'Jl. Merdeka No. 10', '08123456801', 1),
+('S002', '1234567891', 'Budi Hartono', 'L', 'Bandung', '2007-06-15', 'Jl. Pahlawan No. 20', '08123456802', 1),
+('S003', '1234567892', 'Citra Dewi', 'P', 'Surabaya', '2006-12-20', 'Jl. Kenangan No. 30', '08123456803', 2),
+('S004', '1234567893', 'Dina Amelia', 'P', 'Yogyakarta', '2006-11-05', 'Jl. Cendrawasih No. 40', '08123456804', 2),
+('S005', '1234567894', 'Eko Pratama', 'L', 'Semarang', '2005-08-25', 'Jl. Mawar No. 50', '08123456805', 3),
+('S006', '1234567895', 'Fitriani', 'P', 'Malang', '2005-09-30', 'Jl. Melati No. 60', '08123456806', 3);
+
+-- 9. Insert Pelanggaran (akan mengaktifkan trigger after_pelanggaran_insert)
+INSERT INTO pelanggaran (id_siswa, id_poin_pelanggaran, id_guru, tanggal_pelanggaran, keterangan, lokasi, status_verifikasi) VALUES
+(1, 1, 1, '2023-07-10', 'Terlambat 20 menit', 'Gerbang Sekolah', 'Diterima'),
+(2, 2, 2, '2023-07-12', 'Tidak memakai dasi dan topi', 'Lapangan Upacara', 'Diterima'),
+(3, 3, 3, '2023-07-15', 'Ketahuan menggunakan HP saat ulangan matematika', 'Ruang Kelas', 'Diterima'),
+(1, 2, 1, '2023-08-05', 'Tidak memakai kaos kaki', 'Ruang Kelas', 'Diterima'),
+(4, 1, 2, '2023-08-10', 'Terlambat 25 menit', 'Gerbang Sekolah', 'Diterima');
+
+-- 10. Insert Prestasi (akan mengaktifkan trigger after_prestasi_insert)
+INSERT INTO prestasi (id_siswa, id_poin_prestasi, id_guru, tanggal_prestasi, keterangan, dokumen_path, status_verifikasi) VALUES
+(5, 1, 3, '2023-08-20', 'Juara 1 Lomba Web Design Kabupaten', '/dokumen/prestasi1.pdf', 'Diterima'),
+(6, 2, 1, '2023-09-05', 'Juara 2 Lomba Cerdas Cermat Sekolah', '/dokumen/prestasi2.pdf', 'Diterima'),
+(3, 3, 2, '2023-09-10', 'Dipilih sebagai siswa teladan bulan September', '/dokumen/prestasi3.pdf', 'Diterima'),
+(2, 2, 3, '2023-10-15', 'Juara 2 Lomba Desain Poster Sekolah', '/dokumen/prestasi4.pdf', 'Diterima');
+
+-- 11. Insert Tindak Lanjut (akan mengaktifkan trigger after_tindak_lanjut_insert jika ada surat)
+INSERT INTO tindak_lanjut (id_pelanggaran, id_surat_pelanggaran, id_guru_penangan, tanggal_penanganan, jenis_penanganan, deskripsi_penanganan, hasil, status) VALUES
+(3, 1, 1, '2023-07-16', 'Pembinaan', 'Pembinaan tentang kejujuran akademik', 'Siswa menyadari kesalahan dan berjanji tidak mengulangi', 'Selesai'),
+(1, NULL, 2, '2023-07-11', 'Pembinaan', 'Pembinaan tentang kedisiplinan waktu', 'Siswa berjanji akan lebih disiplin', 'Selesai'),
+(2, NULL, 3, '2023-07-13', 'Sanksi', 'Membersihkan kelas selama 3 hari', 'Siswa telah menjalani sanksi dengan baik', 'Selesai'),
+(3, 1, 1, '2023-07-17', 'Sanksi', 'Skorsing 1 hari', 'Siswa telah menjalani skorsing', 'Selesai'),
+(4, NULL, 2, '2023-08-06', 'Pembinaan', 'Pembinaan tentang kedisiplinan seragam', 'Siswa memahami pentingnya seragam lengkap', 'Selesai');
+
+--------------------------------------   
+-- 5. TRIGGER
+--------------------------------------
 
 DELIMITER //
 
@@ -222,8 +308,8 @@ BEGIN
         WHERE s.id_siswa = NEW.id_siswa;
     END IF;
 END//
-
--- Trigger untuk update pelanggaran
+   
+-- Trigger untuk update pelanggaran --
 CREATE TRIGGER after_pelanggaran_update
 AFTER UPDATE ON pelanggaran
 FOR EACH ROW
